@@ -657,8 +657,9 @@ p:empty {
   height: 100%;
 }
 
-.header-logo__image-container {
-  background-color: red;
+.product-media-container {
+  background-color: red !important;
+  border:10px solid blue;
 }
 .background-image-fit img,
 .background-image-fit svg {
