@@ -1,0 +1,363 @@
+{% schema %}
+{
+  "name": "Hero Video",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Video Settings"
+    },
+    {
+      "type": "video",
+      "id": "video_shopify",
+      "label": "Video from Files"
+    },
+    {
+      "type": "video_url",
+      "id": "video_url",
+      "label": "Or use YouTube/Vimeo URL",
+      "accept": ["youtube", "vimeo"],
+      "info": "Upload video to Files and paste URL, or use YouTube/Vimeo"
+    },
+    {
+      "type": "url",
+      "id": "video_file",
+      "label": "Or use direct video file URL",
+      "info": "MP4 format recommended for best compatibility"
+    },
+    {
+      "type": "image_picker",
+      "id": "fallback_image",
+      "label": "Fallback Image",
+      "info": "Shown on mobile or if video fails to load"
+    },
+    {
+      "type": "header",
+      "content": "Overlay Settings"
+    },
+    {
+      "type": "color",
+      "id": "overlay_color",
+      "label": "Overlay Color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "label": "Overlay Opacity",
+      "default": 40
+    },
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Welcome to Our Store"
+    },
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "Description",
+      "default": "<p>Discover amazing products and exceptional service</p>"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button Label",
+      "default": "Shop Now"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button Link"
+    },
+    {
+      "type": "select",
+      "id": "text_alignment",
+      "label": "Text Alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "height_desktop",
+      "min": 400,
+      "max": 1000,
+      "step": 50,
+      "unit": "px",
+      "label": "Height (Desktop)",
+      "default": 600
+    },
+    {
+      "type": "range",
+      "id": "height_mobile",
+      "min": 300,
+      "max": 800,
+      "step": 50,
+      "unit": "px",
+      "label": "Height (Mobile)",
+      "default": 500
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 200,
+      "step": 10,
+      "unit": "px",
+      "label": "Top Spacing",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 200,
+      "step": 10,
+      "unit": "px",
+      "label": "Bottom Spacing",
+      "default": 0
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color Scheme",
+      "default": "scheme-1"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Hero Video"
+    }
+  ]
+}
+{% endschema %}
+
+<style>
+    .hero-video-section-{{ section.id }} {
+        position: relative;
+        overflow: hidden;
+        padding-top: {{ section.settings.padding_top }}px;
+        padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+
+    .hero-video-container-{{ section.id }} {
+        position: relative;
+        width: 100%;
+        height: {{ section.settings.height_mobile }}px;
+        overflow: hidden;
+    }
+
+    @media (min-width: 768px) {
+        .hero-video-container-{{ section.id }} {
+            height: {{ section.settings.height_desktop }}px;
+        }
+    }
+
+    .hero-video-background-{{ section.id }} {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        min-width: 100%;
+        min-height: 100%;
+        width: auto;
+        height: auto;
+        transform: translate(-50%, -50%);
+        object-fit: cover;
+        z-index: 0;
+    }
+
+    .hero-video-fallback-{{ section.id }} {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        z-index: 0;
+    }
+
+    /* Updated overlay to use custom color instead of foreground color */
+    .hero-video-overlay-{{ section.id }} {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: {{ section.settings.overlay_color }};
+        opacity: {{ section.settings.overlay_opacity | divided_by: 100.0 }};
+        z-index: 1;
+    }
+
+    .hero-video-content-{{ section.id }} {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: {{ section.settings.text_alignment }};
+        height: 100%;
+        padding: 40px 20px;
+        text-align: {{ section.settings.text_alignment }};
+        color: rgb(var(--color-background));
+    }
+
+    .hero-video-content-{{ section.id }} h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0 0 20px 0;
+        line-height: 1.2;
+        max-width: 800px;
+    }
+
+    @media (min-width: 768px) {
+        .hero-video-content-{{ section.id }} h1 {
+            font-size: 3.5rem;
+        }
+    }
+
+    .hero-video-content-{{ section.id }} .description {
+        font-size: 1.125rem;
+        margin: 0 0 30px 0;
+        max-width: 600px;
+        line-height: 1.6;
+    }
+
+    @media (min-width: 768px) {
+        .hero-video-content-{{ section.id }} .description {
+            font-size: 1.25rem;
+        }
+    }
+
+    .hero-video-button-{{ section.id }} {
+        display: inline-block;
+        padding: 14px 32px;
+        background: rgb(var(--color-background));
+        color: rgb(var(--color-foreground));
+        text-decoration: none;
+        font-weight: 600;
+        border-radius: 4px;
+        transition: transform 0.2s ease, opacity 0.2s ease;
+    }
+
+    .hero-video-button-{{ section.id }}:hover {
+        transform: translateY(-2px);
+        opacity: 0.9;
+    }
+
+    /* Hide video on mobile devices for performance */
+    @media (max-width: 767px) {
+        .hero-video-background-{{ section.id }} {
+            display: none;
+        }
+    }
+</style>
+
+<div class="hero-video-section-{{ section.id }} color-{{ section.settings.color_scheme }}">
+    <div class="hero-video-container-{{ section.id }}">
+
+        {% comment %} Fallback image {% endcomment %}
+        {% if section.settings.fallback_image %}
+            <img
+                    class="hero-video-fallback-{{ section.id }}"
+                    src="{{ section.settings.fallback_image | image_url: width: 1920 }}"
+                    alt="{{ section.settings.heading | escape }}"
+                    loading="eager"
+            >
+        {% endif %}
+
+        {% comment %} Video background - only on desktop {% endcomment %}
+        {% if section.settings.video_shopify %}
+            {%- comment -%} Using manual video element instead of video_tag filter to avoid syntax issues {%- endcomment -%}
+            <video
+                    class="hero-video-background-{{ section.id }}"
+                    autoplay
+                    muted
+                    loop
+                    playsinline
+                    id="hero-video-{{ section.id }}"
+            >
+                {% for source in section.settings.video_shopify.sources %}
+                    <source src="{{ source.url }}" type="{{ source.mime_type }}">
+                {% endfor %}
+            </video>
+        {% elsif section.settings.video_file != blank %}
+            <video
+                    class="hero-video-background-{{ section.id }}"
+                    autoplay
+                    muted
+                    loop
+                    playsinline
+                    id="hero-video-{{ section.id }}"
+            >
+                <source src="{{ section.settings.video_file }}" type="video/mp4">
+            </video>
+        {% endif %}
+
+        {% comment %} Overlay {% endcomment %}
+        <div class="hero-video-overlay-{{ section.id }}"></div>
+
+        {% comment %} Content {% endcomment %}
+        <div class="hero-video-content-{{ section.id }}">
+            {% if section.settings.heading != blank %}
+                <h1>{{ section.settings.heading }}</h1>
+            {% endif %}
+
+            {% if section.settings.text != blank %}
+                <div class="description">
+                    {{ section.settings.text }}
+                </div>
+            {% endif %}
+
+            {% if section.settings.button_label != blank %}
+                <a href="{{ section.settings.button_link | default: '#' }}" class="hero-video-button-{{ section.id }}">
+                    {{ section.settings.button_label }}
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        const video = document.getElementById('hero-video-{{ section.id }}');
+
+        if (video) {
+            // Ensure video plays on load
+            video.addEventListener('loadedmetadata', function() {
+                video.play().catch(function(error) {
+                    console.log('Video autoplay prevented:', error);
+                });
+            });
+
+            // Handle video errors
+            video.addEventListener('error', function() {
+                console.log('Video failed to load');
+                video.style.display = 'none';
+            });
+        }
+    })();
+</script>

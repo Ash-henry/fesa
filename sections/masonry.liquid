@@ -1,0 +1,545 @@
+{% comment %}
+  Masonry Product Grid Section
+  Pinterest-style grid layout with staggered product cards
+{% endcomment %}
+
+<style>
+    .masonry-grid-{{ section.id }} {
+        padding-top: {{ section.settings.padding_top }}px;
+        padding-bottom: {{ section.settings.padding_bottom }}px;
+        background: rgb(var(--color-scheme-background));
+    }
+
+    .masonry-grid-container-{{ section.id }} {
+        max-width: {{ section.settings.container_width }}px;
+        margin: 0 auto;
+        padding: 0 {{ section.settings.horizontal_padding }}px;
+    }
+
+    .masonry-grid-header-{{ section.id }} {
+        text-align: {{ section.settings.heading_alignment }};
+        margin-bottom: {{ section.settings.heading_spacing }}px;
+    }
+
+    .masonry-grid-title-{{ section.id }} {
+        font-size: {{ section.settings.heading_size }}px;
+        font-weight: 600;
+        color: rgb(var(--color-scheme-text));
+        margin: 0 0 12px 0;
+    }
+
+    .masonry-grid-description-{{ section.id }} {
+        font-size: 16px;
+        color: rgba(var(--color-scheme-text), 0.7);
+        margin: 0;
+    }
+
+    .masonry-grid-items-{{ section.id }} {
+        display: grid;
+        grid-template-columns: repeat({{ section.settings.columns_desktop }}, 1fr);
+        gap: {{ section.settings.grid_gap }}px;
+        grid-auto-flow: dense;
+    }
+
+    .masonry-grid-item-{{ section.id }} {
+        position: relative;
+        overflow: hidden;
+        border-radius: {{ section.settings.card_radius }}px;
+        background: rgb(var(--color-scheme-card));
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .masonry-grid-item-{{ section.id }}:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .masonry-grid-item-{{ section.id }}.tall {
+        grid-row: span 2;
+    }
+
+    .masonry-grid-item-{{ section.id }}.wide {
+        grid-column: span 2;
+    }
+
+    .masonry-grid-image-wrapper-{{ section.id }} {
+        position: relative;
+        width: 100%;
+        overflow: hidden;
+    }
+
+    .masonry-grid-image-{{ section.id }} {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        transition: transform 0.5s ease;
+    }
+
+    .masonry-grid-item-{{ section.id }}:hover .masonry-grid-image-{{ section.id }} {
+        transform: scale(1.05);
+    }
+
+    .masonry-grid-overlay-{{ section.id }} {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+        padding: 24px;
+        transform: translateY(100%);
+        transition: transform 0.3s ease;
+    }
+
+    {% if section.settings.show_overlay_always %}
+    .masonry-grid-overlay-{{ section.id }} {
+        transform: translateY(0);
+    }
+    {% else %}
+    .masonry-grid-item-{{ section.id }}:hover .masonry-grid-overlay-{{ section.id }} {
+        transform: translateY(0);
+    }
+    {% endif %}
+
+    .masonry-grid-product-title-{{ section.id }} {
+        font-size: 18px;
+        font-weight: 600;
+        color: white;
+        margin: 0 0 8px 0;
+    }
+
+    .masonry-grid-product-price-{{ section.id }} {
+        font-size: 16px;
+        font-weight: 500;
+        color: white;
+        margin: 0;
+    }
+
+    .masonry-grid-badge-{{ section.id }} {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        background: {{ section.settings.badge_color }};
+        color: white;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    @media (max-width: 1024px) {
+        .masonry-grid-items-{{ section.id }} {
+            grid-template-columns: repeat({{ section.settings.columns_tablet }}, 1fr);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .masonry-grid-items-{{ section.id }} {
+            grid-template-columns: repeat({{ section.settings.columns_mobile }}, 1fr);
+            gap: {{ section.settings.grid_gap | divided_by: 2 }}px;
+        }
+
+        .masonry-grid-item-{{ section.id }}.wide {
+            grid-column: span 1;
+        }
+
+        .masonry-grid-title-{{ section.id }} {
+            font-size: {{ section.settings.heading_size | times: 0.7 }}px;
+        }
+    }
+</style>
+
+<div class="masonry-grid-{{ section.id }}" data-section-id="{{ section.id }}">
+    <div class="masonry-grid-container-{{ section.id }}">
+        {% if section.settings.heading != blank or section.settings.description != blank %}
+            <div class="masonry-grid-header-{{ section.id }}">
+                {% if section.settings.heading != blank %}
+                    <h2 class="masonry-grid-title-{{ section.id }}">{{ section.settings.heading }}</h2>
+                {% endif %}
+                {% if section.settings.description != blank %}
+                    <p class="masonry-grid-description-{{ section.id }}">{{ section.settings.description }}</p>
+                {% endif %}
+            </div>
+        {% endif %}
+
+        <div class="masonry-grid-items-{{ section.id }}" id="masonry-grid-{{ section.id }}">
+            {% if section.settings.collection != blank %}
+                {% assign collection = collections[section.settings.collection] %}
+                {% assign products_to_show = section.settings.products_limit %}
+
+                {% for product in collection.products limit: products_to_show %}
+                    <a
+                            href="{{ product.url }}"
+                            class="masonry-grid-item-{{ section.id }}"
+                    >
+                        <div class="masonry-grid-image-wrapper-{{ section.id }}">
+                            {% if product.featured_image != blank %}
+                                <img
+                                        src="{{ product.featured_image | img_url: '800x' }}"
+                                        alt="{{ product.title }}"
+                                        class="masonry-grid-image-{{ section.id }}"
+                                        loading="lazy"
+                                >
+                            {% else %}
+                                {{ 'product-1' | placeholder_svg_tag: 'masonry-grid-image-' | append: section.id }}
+                            {% endif %}
+
+                            {% if product.compare_at_price > product.price %}
+                                <div class="masonry-grid-badge-{{ section.id }}">Sale</div>
+                            {% elsif product.available == false %}
+                                <div class="masonry-grid-badge-{{ section.id }}">Sold Out</div>
+                            {% elsif section.settings.show_new_badge and product.published_at %}
+                                {% assign days_since_published = 'now' | date: '%s' | minus: product.published_at | date: '%s' | divided_by: 86400 %}
+                                {% if days_since_published <= 30 %}
+                                    <div class="masonry-grid-badge-{{ section.id }}">New</div>
+                                {% endif %}
+                            {% endif %}
+
+                            <div class="masonry-grid-overlay-{{ section.id }}">
+                                <h3 class="masonry-grid-product-title-{{ section.id }}">{{ product.title }}</h3>
+                                <p class="masonry-grid-product-price-{{ section.id }}">
+                                    {% if product.compare_at_price > product.price %}
+                                        <s style="opacity: 0.6; margin-right: 8px;">{{ product.compare_at_price | money }}</s>
+                                    {% endif %}
+                                    {{ product.price | money }}
+                                </p>
+                            </div>
+                        </div>
+                    </a>
+                {% endfor %}
+            {% else %}
+                {% for block in section.blocks %}
+                    {% case block.type %}
+                        {% when 'product' %}
+                            <a
+                                    href="{{ block.settings.product_url }}"
+                                    class="masonry-grid-item-{{ section.id }} {% if block.settings.size == 'tall' %}tall{% elsif block.settings.size == 'wide' %}wide{% endif %}"
+                                    {{ block.shopify_attributes }}
+                            >
+                                <div class="masonry-grid-image-wrapper-{{ section.id }}">
+                                    {% if block.settings.image != blank %}
+                                        <img
+                                                src="{{ block.settings.image | img_url: '800x' }}"
+                                                alt="{{ block.settings.title }}"
+                                                class="masonry-grid-image-{{ section.id }}"
+                                                loading="lazy"
+                                        >
+                                    {% else %}
+                                        {{ 'product-1' | placeholder_svg_tag: 'masonry-grid-image-' | append: section.id }}
+                                    {% endif %}
+
+                                    {% if block.settings.badge != blank %}
+                                        <div class="masonry-grid-badge-{{ section.id }}">{{ block.settings.badge }}</div>
+                                    {% endif %}
+
+                                    <div class="masonry-grid-overlay-{{ section.id }}">
+                                        <h3 class="masonry-grid-product-title-{{ section.id }}">{{ block.settings.title }}</h3>
+                                        {% if block.settings.price != blank %}
+                                            <p class="masonry-grid-product-price-{{ section.id }}">{{ block.settings.price }}</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </a>
+                    {% endcase %}
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // Shuffle masonry items for natural layout on load
+        function shuffleMasonryItems() {
+            const container = document.getElementById('masonry-grid-{{ section.id }}');
+            if (!container) return;
+
+            const items = Array.from(container.children);
+
+            // Randomly assign tall/wide classes for variety
+            items.forEach((item, index) => {
+                if (window.innerWidth > 768 && Math.random() > 0.7) {
+                    if (Math.random() > 0.5 && !item.classList.contains('wide')) {
+                        item.classList.add('tall');
+                    }
+                }
+            });
+        }
+
+        // Initialize on load
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', shuffleMasonryItems);
+        } else {
+            shuffleMasonryItems();
+        }
+
+        // Recalculate on window resize
+        let resizeTimer;
+        window.addEventListener('resize', function() {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(shuffleMasonryItems, 250);
+        });
+    })();
+</script>
+
+{% schema %}
+{
+  "name": "Masonry Product Grid",
+  "settings": [
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Collection",
+      "info": "Select a collection to auto-populate products. Leave blank to use manual blocks below."
+    },
+    {
+      "type": "range",
+      "id": "products_limit",
+      "min": 3,
+      "max": 50,
+      "step": 1,
+      "label": "Products to Show",
+      "default": 12,
+      "info": "Only applies when a collection is selected"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_new_badge",
+      "label": "Show 'New' Badge",
+      "default": true,
+      "info": "Shows badge on products published within 30 days"
+    },
+    {
+      "type": "header",
+      "content": "Heading"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Featured Products"
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Description",
+      "default": "Discover our curated collection"
+    },
+    {
+      "type": "select",
+      "id": "heading_alignment",
+      "label": "Heading Alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "range",
+      "id": "heading_size",
+      "min": 24,
+      "max": 72,
+      "step": 2,
+      "unit": "px",
+      "label": "Heading Size",
+      "default": 48
+    },
+    {
+      "type": "range",
+      "id": "heading_spacing",
+      "min": 20,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Heading Bottom Space",
+      "default": 40
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "columns_desktop",
+      "min": 2,
+      "max": 6,
+      "step": 1,
+      "label": "Columns (Desktop)",
+      "default": 4
+    },
+    {
+      "type": "range",
+      "id": "columns_tablet",
+      "min": 2,
+      "max": 4,
+      "step": 1,
+      "label": "Columns (Tablet)",
+      "default": 3
+    },
+    {
+      "type": "range",
+      "id": "columns_mobile",
+      "min": 1,
+      "max": 3,
+      "step": 1,
+      "label": "Columns (Mobile)",
+      "default": 2
+    },
+    {
+      "type": "range",
+      "id": "grid_gap",
+      "min": 0,
+      "max": 60,
+      "step": 5,
+      "unit": "px",
+      "label": "Grid Gap",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "card_radius",
+      "min": 0,
+      "max": 30,
+      "step": 2,
+      "unit": "px",
+      "label": "Card Border Radius",
+      "default": 12
+    },
+    {
+      "type": "header",
+      "content": "Container"
+    },
+    {
+      "type": "range",
+      "id": "container_width",
+      "min": 1000,
+      "max": 1600,
+      "step": 50,
+      "unit": "px",
+      "label": "Max Container Width",
+      "default": 1400
+    },
+    {
+      "type": "range",
+      "id": "horizontal_padding",
+      "min": 10,
+      "max": 60,
+      "step": 5,
+      "unit": "px",
+      "label": "Horizontal Padding",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 200,
+      "step": 10,
+      "unit": "px",
+      "label": "Top Padding",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 200,
+      "step": 10,
+      "unit": "px",
+      "label": "Bottom Padding",
+      "default": 60
+    },
+    {
+      "type": "header",
+      "content": "Style"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color Scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_overlay_always",
+      "label": "Always Show Overlay",
+      "default": false,
+      "info": "Show product info without hover"
+    },
+    {
+      "type": "color",
+      "id": "badge_color",
+      "label": "Badge Color",
+      "default": "#ff6b6b"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "product",
+      "name": "Product Card",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Product Image"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Product Title",
+          "default": "Product Name"
+        },
+        {
+          "type": "text",
+          "id": "price",
+          "label": "Product Price",
+          "default": "$99.00"
+        },
+        {
+          "type": "url",
+          "id": "product_url",
+          "label": "Product Link"
+        },
+        {
+          "type": "text",
+          "id": "badge",
+          "label": "Badge Text",
+          "placeholder": "New, Sale, etc.",
+          "info": "Leave blank for no badge"
+        },
+        {
+          "type": "select",
+          "id": "size",
+          "label": "Card Size",
+          "options": [
+            { "value": "normal", "label": "Normal" },
+            { "value": "tall", "label": "Tall (2x height)" },
+            { "value": "wide", "label": "Wide (2x width)" }
+          ],
+          "default": "normal",
+          "info": "Wide cards only work on desktop"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Masonry Product Grid",
+      "blocks": [
+        { "type": "product" },
+        { "type": "product" },
+        { "type": "product" },
+        { "type": "product" },
+        { "type": "product" },
+        { "type": "product" },
+        { "type": "product" },
+        { "type": "product" }
+      ]
+    }
+  ]
+}
+{% endschema %}

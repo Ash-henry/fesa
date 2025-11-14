@@ -1,0 +1,451 @@
+{% comment %}
+  Social Media Feed Section
+  Displays a grid of social media posts with hover effects and captions
+{% endcomment %}
+
+<style>
+    .social-feed-{{ section.id }} {
+        padding-top: {{ section.settings.spacing_top }}px;
+        padding-bottom: {{ section.settings.spacing_bottom }}px;
+        background: rgb(var(--color-background));
+        color: rgb(var(--color-text));
+    }
+
+    .social-feed-container-{{ section.id }} {
+        max-width: {{ section.settings.container_width }}px;
+        margin: 0 auto;
+        padding: 0 20px;
+    }
+
+    .social-feed-header-{{ section.id }} {
+        text-align: {{ section.settings.text_align }};
+        margin-bottom: 48px;
+    }
+
+    .social-feed-title-{{ section.id }} {
+        font-size: {{ section.settings.title_size }}px;
+        font-weight: 700;
+        margin: 0 0 12px 0;
+        color: rgb(var(--color-heading));
+    }
+
+    .social-feed-description-{{ section.id }} {
+        font-size: {{ section.settings.description_size }}px;
+        color: rgb(var(--color-text-secondary));
+        margin: 0;
+        max-width: 600px;
+        margin-left: {% if section.settings.text_align == 'center' %}auto{% else %}0{% endif %};
+        margin-right: {% if section.settings.text_align == 'center' %}auto{% else %}0{% endif %};
+    }
+
+    .social-feed-grid-{{ section.id }} {
+        display: grid;
+        grid-template-columns: repeat({{ section.settings.columns_mobile }}, 1fr);
+        gap: {{ section.settings.gap }}px;
+    }
+
+    @media (min-width: 768px) {
+        .social-feed-grid-{{ section.id }} {
+            grid-template-columns: repeat({{ section.settings.columns_tablet }}, 1fr);
+        }
+    }
+
+    @media (min-width: 1024px) {
+        .social-feed-grid-{{ section.id }} {
+            grid-template-columns: repeat({{ section.settings.columns_desktop }}, 1fr);
+        }
+    }
+
+    .social-feed-item-{{ section.id }} {
+        position: relative;
+        overflow: hidden;
+        border-radius: {{ section.settings.card_radius }}px;
+        background: rgb(var(--color-card-background));
+        aspect-ratio: 1;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .social-feed-item-{{ section.id }}:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+    }
+
+    .social-feed-image-{{ section.id }} {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+
+    .social-feed-item-{{ section.id }}:hover .social-feed-image-{{ section.id }} {
+        transform: scale(1.05);
+    }
+
+    .social-feed-overlay-{{ section.id }} {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, transparent 60%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        padding: 20px;
+    }
+
+    .social-feed-item-{{ section.id }}:hover .social-feed-overlay-{{ section.id }} {
+        opacity: 1;
+    }
+
+    .social-feed-caption-{{ section.id }} {
+        color: white;
+        font-size: 14px;
+        line-height: 1.5;
+        margin: 0 0 12px 0;
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+    }
+
+    .social-feed-meta-{{ section.id }} {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 13px;
+    }
+
+    .social-feed-meta-item-{{ section.id }} {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .social-feed-icon-{{ section.id }} {
+        width: 16px;
+        height: 16px;
+    }
+
+    .social-feed-link-{{ section.id }} {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 1;
+    }
+
+    .social-feed-cta-{{ section.id }} {
+        text-align: center;
+        margin-top: 48px;
+    }
+
+    .social-feed-button-{{ section.id }} {
+        display: inline-block;
+        padding: 14px 32px;
+        background: rgb(var(--color-button-background));
+        color: rgb(var(--color-button-text));
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 16px;
+        transition: all 0.2s ease;
+        border: 2px solid rgb(var(--color-button-background));
+    }
+
+    .social-feed-button-{{ section.id }}:hover {
+        background: transparent;
+        color: rgb(var(--color-button-background));
+    }
+</style>
+
+<div class="social-feed-{{ section.id }} color-{{ section.settings.color_scheme }}">
+    <div class="social-feed-container-{{ section.id }}">
+        {% if section.settings.title != blank or section.settings.description != blank %}
+            <div class="social-feed-header-{{ section.id }}">
+                {% if section.settings.title != blank %}
+                    <h2 class="social-feed-title-{{ section.id }}">{{ section.settings.title }}</h2>
+                {% endif %}
+                {% if section.settings.description != blank %}
+                    <p class="social-feed-description-{{ section.id }}">{{ section.settings.description }}</p>
+                {% endif %}
+            </div>
+        {% endif %}
+
+        <div class="social-feed-grid-{{ section.id }}">
+            {% for block in section.blocks %}
+                <div class="social-feed-item-{{ section.id }}" {{ block.shopify_attributes }}>
+                    {% if block.settings.image != blank %}
+                        <img
+                                src="{{ block.settings.image | image_url: width: 800 }}"
+                                alt="{{ block.settings.caption | default: 'Social media post' }}"
+                                loading="lazy"
+                                class="social-feed-image-{{ section.id }}"
+                        >
+                    {% else %}
+                        <img
+                                src="https://via.placeholder.com/800x800/cccccc/666666?text=Add+Image"
+                                alt="Placeholder"
+                                class="social-feed-image-{{ section.id }}"
+                        >
+                    {% endif %}
+
+                    <div class="social-feed-overlay-{{ section.id }}">
+                        {% if block.settings.caption != blank %}
+                            <p class="social-feed-caption-{{ section.id }}">{{ block.settings.caption }}</p>
+                        {% endif %}
+
+                        <div class="social-feed-meta-{{ section.id }}">
+                            {% if block.settings.likes != blank %}
+                                <div class="social-feed-meta-item-{{ section.id }}">
+                                    <svg class="social-feed-icon-{{ section.id }}" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                                    </svg>
+                                    <span>{{ block.settings.likes }}</span>
+                                </div>
+                            {% endif %}
+
+                            {% if block.settings.comments != blank %}
+                                <div class="social-feed-meta-item-{{ section.id }}">
+                                    <svg class="social-feed-icon-{{ section.id }}" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M21 6h-2v9H6v2c0 .55.45 1 1 1h11l4 4V7c0-.55-.45-1-1-1zm-4 6V3c0-.55-.45-1-1-1H3c-.55 0-1 .45-1 1v14l4-4h10c.55 0 1-.45 1-1z"/>
+                                    </svg>
+                                    <span>{{ block.settings.comments }}</span>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    {% if block.settings.link != blank %}
+                        <a href="{{ block.settings.link }}" class="social-feed-link-{{ section.id }}" {% if block.settings.link contains 'http' %}target="_blank" rel="noopener"{% endif %}></a>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+
+        {% if section.settings.cta_text != blank and section.settings.cta_link != blank %}
+            <div class="social-feed-cta-{{ section.id }}">
+                <a href="{{ section.settings.cta_link }}" class="social-feed-button-{{ section.id }}" {% if section.settings.cta_link contains 'http' %}target="_blank" rel="noopener"{% endif %}>
+                    {{ section.settings.cta_text }}
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+{% schema %}
+{
+  "name": "Social Feed",
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color Scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title",
+      "default": "Follow Us"
+    },
+    {
+      "type": "range",
+      "id": "title_size",
+      "label": "Title Size",
+      "min": 20,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Description",
+      "default": "Stay connected with our latest updates and behind-the-scenes moments"
+    },
+    {
+      "type": "range",
+      "id": "description_size",
+      "label": "Description Size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "select",
+      "id": "text_align",
+      "label": "Text Alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "container_width",
+      "label": "Container Width",
+      "min": 800,
+      "max": 1600,
+      "step": 100,
+      "unit": "px",
+      "default": 1200
+    },
+    {
+      "type": "range",
+      "id": "columns_mobile",
+      "label": "Columns (Mobile)",
+      "min": 1,
+      "max": 3,
+      "step": 1,
+      "default": 2
+    },
+    {
+      "type": "range",
+      "id": "columns_tablet",
+      "label": "Columns (Tablet)",
+      "min": 2,
+      "max": 4,
+      "step": 1,
+      "default": 3
+    },
+    {
+      "type": "range",
+      "id": "columns_desktop",
+      "label": "Columns (Desktop)",
+      "min": 3,
+      "max": 6,
+      "step": 1,
+      "default": 4
+    },
+    {
+      "type": "range",
+      "id": "gap",
+      "label": "Gap Between Items",
+      "min": 8,
+      "max": 48,
+      "step": 4,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "card_radius",
+      "label": "Card Border Radius",
+      "min": 0,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "spacing_top",
+      "label": "Top Spacing",
+      "min": 0,
+      "max": 200,
+      "step": 10,
+      "unit": "px",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "spacing_bottom",
+      "label": "Bottom Spacing",
+      "min": 0,
+      "max": 200,
+      "step": 10,
+      "unit": "px",
+      "default": 60
+    },
+    {
+      "type": "header",
+      "content": "Call to Action"
+    },
+    {
+      "type": "text",
+      "id": "cta_text",
+      "label": "Button Text",
+      "default": "View More"
+    },
+    {
+      "type": "url",
+      "id": "cta_link",
+      "label": "Button Link"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "post",
+      "name": "Social Post",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "textarea",
+          "id": "caption",
+          "label": "Caption",
+          "placeholder": "Add a caption for this post..."
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link",
+          "info": "Link to original social media post"
+        },
+        {
+          "type": "text",
+          "id": "likes",
+          "label": "Likes Count",
+          "placeholder": "1.2k"
+        },
+        {
+          "type": "text",
+          "id": "comments",
+          "label": "Comments Count",
+          "placeholder": "42"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Social Feed",
+      "blocks": [
+        { "type": "post" },
+        { "type": "post" },
+        { "type": "post" },
+        { "type": "post" },
+        { "type": "post" },
+        { "type": "post" },
+        { "type": "post" },
+        { "type": "post" }
+      ]
+    }
+  ]
+}
+{% endschema %}

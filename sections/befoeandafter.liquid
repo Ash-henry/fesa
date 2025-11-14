@@ -1,0 +1,390 @@
+{% comment %}
+  Before and After Image Slider Component
+  Drag the handle to reveal before/after images
+{% endcomment %}
+
+<style>
+    .before-after-slider {
+        position: relative;
+        overflow: hidden;
+        width: 100%;
+        max-width: {{ section.settings.max_width }}px;
+        margin: 0 auto;
+        border-radius: {{ section.settings.border_radius }}px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        user-select: none;
+        -webkit-user-select: none;
+    }
+
+    .before-after-slider__container {
+        padding-top: {{ section.settings.spacing_top }}px;
+        padding-bottom: {{ section.settings.spacing_bottom }}px;
+    }
+
+    .before-after-slider__wrapper {
+        position: relative;
+        width: 100%;
+        height: 0;
+        padding-bottom: {{ section.settings.aspect_ratio }}%;
+    }
+
+    .before-after-slider__image {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .before-after-slider__after-container {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        clip-path: inset(0 0 0 0);
+    }
+
+    .before-after-slider__handle-container {
+        position: absolute;
+        top: 0;
+        width: 4px;
+        height: 100%;
+        background: {{ section.settings.handle_color }};
+        cursor: ew-resize;
+        z-index: 10;
+        touch-action: none;
+    }
+
+    .before-after-slider__handle {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 48px;
+        height: 48px;
+        background: {{ section.settings.handle_color }};
+        border: 3px solid rgb(var(--color-scheme-text));
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .before-after-slider__handle svg {
+        width: 24px;
+        height: 24px;
+        fill: rgb(var(--color-scheme-text));
+    }
+
+    .before-after-slider__label {
+        position: absolute;
+        top: 20px;
+        padding: 8px 16px;
+        background: rgba(var(--color-scheme-text), 0.8);
+        color: rgb(var(--color-scheme-background));
+        font-size: 14px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        border-radius: 4px;
+        z-index: 5;
+    }
+
+    .before-after-slider__label--before {
+        left: 20px;
+    }
+
+    .before-after-slider__label--after {
+        right: 20px;
+    }
+
+    @media (max-width: 768px) {
+        .before-after-slider__label {
+            font-size: 12px;
+            padding: 6px 12px;
+            top: 12px;
+        }
+
+        .before-after-slider__label--before {
+            left: 12px;
+        }
+
+        .before-after-slider__label--after {
+            right: 12px;
+        }
+
+        .before-after-slider__handle {
+            width: 40px;
+            height: 40px;
+        }
+
+        .before-after-slider__handle svg {
+            width: 20px;
+            height: 20px;
+        }
+    }
+</style>
+
+<div class="before-after-slider__container">
+    <div class="before-after-slider"
+         style="background-color: rgb(var(--color-scheme-background)); color: rgb(var(--color-scheme-text));">
+
+        {% if section.settings.section_title != blank %}
+            <h2 style="text-align: center; margin-bottom: 32px; font-size: 32px; font-weight: 700; color: rgb(var(--color-scheme-text));">
+                {{ section.settings.section_title }}
+            </h2>
+        {% endif %}
+
+        <div class="before-after-slider__wrapper" data-slider>
+
+            <!-- Before Image -->
+            {% if section.settings.before_image %}
+                <img
+                        src="{{ section.settings.before_image | image_url: width: 2000 }}"
+                        alt="{{ section.settings.before_label | default: 'Before' }}"
+                        class="before-after-slider__image"
+                        loading="lazy"
+                >
+            {% else %}
+                <img
+                        src="https://via.placeholder.com/1200x800/333333/FFFFFF?text=Before+Image"
+                        alt="Before"
+                        class="before-after-slider__image"
+                >
+            {% endif %}
+
+            <!-- After Image Container -->
+            <div class="before-after-slider__after-container" data-after-container>
+                {% if section.settings.after_image %}
+                    <img
+                            src="{{ section.settings.after_image | image_url: width: 2000 }}"
+                            alt="{{ section.settings.after_label | default: 'After' }}"
+                            class="before-after-slider__image"
+                            loading="lazy"
+                    >
+                {% else %}
+                    <img
+                            src="https://via.placeholder.com/1200x800/00A6ED/FFFFFF?text=After+Image"
+                            alt="After"
+                            class="before-after-slider__image"
+                    >
+                {% endif %}
+            </div>
+
+            <!-- Labels -->
+            {% if section.settings.show_labels %}
+                <div class="before-after-slider__label before-after-slider__label--before">
+                    {{ section.settings.before_label | default: "Before" }}
+                </div>
+                <div class="before-after-slider__label before-after-slider__label--after">
+                    {{ section.settings.after_label | default: "After" }}
+                </div>
+            {% endif %}
+
+            <!-- Draggable Handle -->
+            <div class="before-after-slider__handle-container" data-handle style="left: {{ section.settings.initial_position }}%;">
+                <div class="before-after-slider__handle">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+                        <path d="M8.59 16.59L10 18l6-6-6-6-1.41 1.41L13.17 12z"/>
+                    </svg>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        const sliders = document.querySelectorAll('[data-slider]');
+
+        sliders.forEach(slider => {
+            const handle = slider.querySelector('[data-handle]');
+            const afterContainer = slider.querySelector('[data-after-container]');
+            let isDragging = false;
+
+            function updateSlider(x) {
+                const rect = slider.getBoundingClientRect();
+                const position = Math.max(0, Math.min(x - rect.left, rect.width));
+                const percentage = (position / rect.width) * 100;
+
+                handle.style.left = percentage + '%';
+                afterContainer.style.clipPath = `inset(0 ${100 - percentage}% 0 0)`;
+            }
+
+            function onMove(e) {
+                if (!isDragging) return;
+
+                const x = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+                updateSlider(x);
+            }
+
+            function onStart(e) {
+                isDragging = true;
+                slider.style.cursor = 'ew-resize';
+
+                const x = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+                updateSlider(x);
+            }
+
+            function onEnd() {
+                isDragging = false;
+                slider.style.cursor = 'default';
+            }
+
+            // Mouse events
+            handle.addEventListener('mousedown', onStart);
+            document.addEventListener('mousemove', onMove);
+            document.addEventListener('mouseup', onEnd);
+
+            // Touch events
+            handle.addEventListener('touchstart', onStart, { passive: true });
+            document.addEventListener('touchmove', onMove, { passive: true });
+            document.addEventListener('touchend', onEnd);
+
+            // Click anywhere to move handle
+            slider.addEventListener('click', (e) => {
+                if (e.target === handle || handle.contains(e.target)) return;
+                updateSlider(e.clientX);
+            });
+
+            // Initialize position
+            const initialPosition = {{ section.settings.initial_position | default: 50 }};
+            handle.style.left = initialPosition + '%';
+            afterContainer.style.clipPath = `inset(0 ${100 - initialPosition}% 0 0)`;
+        });
+    })();
+</script>
+
+{% schema %}
+{
+  "name": "Before After Slider",
+  "settings": [
+    {
+      "type": "text",
+      "id": "section_title",
+      "label": "Section Title",
+      "default": "See The Difference"
+    },
+    {
+      "type": "image_picker",
+      "id": "before_image",
+      "label": "Before Image"
+    },
+    {
+      "type": "image_picker",
+      "id": "after_image",
+      "label": "After Image"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_labels",
+      "label": "Show Labels",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "before_label",
+      "label": "Before Label",
+      "default": "Before"
+    },
+    {
+      "type": "text",
+      "id": "after_label",
+      "label": "After Label",
+      "default": "After"
+    },
+    {
+      "type": "range",
+      "id": "initial_position",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "label": "Initial Handle Position",
+      "default": 50
+    },
+    {
+      "type": "range",
+      "id": "max_width",
+      "min": 600,
+      "max": 1600,
+      "step": 50,
+      "unit": "px",
+      "label": "Maximum Width",
+      "default": 1200
+    },
+    {
+      "type": "range",
+      "id": "aspect_ratio",
+      "min": 40,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "label": "Aspect Ratio (Height %)",
+      "default": 65,
+      "info": "65% = 3:2 ratio, 55% = 16:9 ratio, 75% = 4:3 ratio"
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "min": 0,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "label": "Border Radius",
+      "default": 8
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "spacing_top",
+      "min": 0,
+      "max": 200,
+      "step": 10,
+      "unit": "px",
+      "label": "Top Spacing",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "spacing_bottom",
+      "min": 0,
+      "max": 200,
+      "step": 10,
+      "unit": "px",
+      "label": "Bottom Spacing",
+      "default": 40
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "handle_color",
+      "label": "Handle Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color Scheme",
+      "default": "scheme-1"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Before After Slider"
+    }
+  ]
+}
+{% endschema %}

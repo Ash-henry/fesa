@@ -1,0 +1,279 @@
+{% comment %}
+  Parallax Section
+  Features: CSS-based parallax scrolling using background-attachment fixed
+{% endcomment %}
+
+<style>
+    .parallax-section-{{ section.id }} {
+        position: relative;
+        overflow: hidden;
+        min-height: {{ section.settings.section_height }}px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding-top: {{ section.settings.padding_top }}px;
+        padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+
+    /* Using CSS background-attachment: fixed for parallax effect */
+    .parallax-background-{{ section.id }} {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url('{{ section.settings.background_image | image_url: width: 2000 }}');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        z-index: 0;
+    }
+
+    /* Mobile fallback - disable fixed attachment on mobile for better performance */
+    @media (max-width: 768px) {
+        .parallax-background-{{ section.id }} {
+            background-attachment: scroll;
+        }
+    }
+
+    .parallax-overlay-{{ section.id }} {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(
+      {{ section.settings.color_scheme.settings.background.red }},
+      {{ section.settings.color_scheme.settings.background.green }},
+      {{ section.settings.color_scheme.settings.background.blue }},
+      {{ section.settings.overlay_opacity | divided_by: 100.0 }}
+    );
+        z-index: 1;
+    }
+
+    .parallax-content-{{ section.id }} {
+        position: relative;
+        z-index: 2;
+        max-width: {{ section.settings.content_width }}px;
+        margin: 0 auto;
+        padding: 0 20px;
+        text-align: {{ section.settings.text_alignment }};
+        color: rgb(
+      {{ section.settings.color_scheme.settings.text.red }},
+      {{ section.settings.color_scheme.settings.text.green }},
+      {{ section.settings.color_scheme.settings.text.blue }}
+    );
+    }
+
+    .parallax-heading-{{ section.id }} {
+        font-size: {{ section.settings.heading_size }}px;
+        font-weight: 700;
+        margin: 0 0 20px 0;
+        line-height: 1.2;
+        letter-spacing: -0.02em;
+    }
+
+    .parallax-text-{{ section.id }} {
+        font-size: {{ section.settings.text_size }}px;
+        line-height: 1.6;
+        margin: 0 0 30px 0;
+        opacity: 0.9;
+    }
+
+    .parallax-button-{{ section.id }} {
+        display: inline-block;
+        padding: 15px 40px;
+        font-size: 16px;
+        font-weight: 600;
+        text-decoration: none;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        background-color: rgb(
+      {{ section.settings.color_scheme.settings.button.red }},
+      {{ section.settings.color_scheme.settings.button.green }},
+      {{ section.settings.color_scheme.settings.button.blue }}
+    );
+        color: rgb(
+      {{ section.settings.color_scheme.settings.button_label.red }},
+      {{ section.settings.color_scheme.settings.button_label.green }},
+      {{ section.settings.color_scheme.settings.button_label.blue }}
+    );
+    }
+
+    .parallax-button-{{ section.id }}:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    @media (max-width: 768px) {
+        .parallax-section-{{ section.id }} {
+            min-height: {{ section.settings.section_height | times: 0.7 }}px;
+        }
+
+        .parallax-heading-{{ section.id }} {
+            font-size: {{ section.settings.heading_size | times: 0.6 }}px;
+        }
+
+        .parallax-text-{{ section.id }} {
+            font-size: {{ section.settings.text_size | times: 0.9 }}px;
+        }
+    }
+</style>
+
+<section class="parallax-section-{{ section.id }}">
+    <div class="parallax-background-{{ section.id }}"></div>
+    <div class="parallax-overlay-{{ section.id }}"></div>
+
+    <div class="parallax-content-{{ section.id }}">
+        {% if section.settings.heading != blank %}
+            <h2 class="parallax-heading-{{ section.id }}">{{ section.settings.heading }}</h2>
+        {% endif %}
+
+        {% if section.settings.text != blank %}
+            <p class="parallax-text-{{ section.id }}">{{ section.settings.text }}</p>
+        {% endif %}
+
+        {% if section.settings.button_label != blank and section.settings.button_link != blank %}
+            <a href="{{ section.settings.button_link }}" class="parallax-button-{{ section.id }}">
+                {{ section.settings.button_label }}
+            </a>
+        {% endif %}
+    </div>
+</section>
+
+{% schema %}
+{
+  "name": "Parallax",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "background_image",
+      "label": "Background Image"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color Scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "label": "Overlay Opacity",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "default": 50,
+      "unit": "%"
+    },
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Discover the Difference"
+    },
+    {
+      "type": "range",
+      "id": "heading_size",
+      "label": "Heading Size",
+      "min": 24,
+      "max": 120,
+      "step": 4,
+      "default": 64,
+      "unit": "px"
+    },
+    {
+      "type": "textarea",
+      "id": "text",
+      "label": "Text",
+      "default": "Experience depth and motion with smooth parallax scrolling that brings your story to life."
+    },
+    {
+      "type": "range",
+      "id": "text_size",
+      "label": "Text Size",
+      "min": 14,
+      "max": 32,
+      "step": 2,
+      "default": 18,
+      "unit": "px"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button Label",
+      "default": "Learn More"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button Link"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "section_height",
+      "label": "Section Height",
+      "min": 300,
+      "max": 1000,
+      "step": 50,
+      "default": 600,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "content_width",
+      "label": "Content Width",
+      "min": 400,
+      "max": 1400,
+      "step": 100,
+      "default": 800,
+      "unit": "px"
+    },
+    {
+      "type": "select",
+      "id": "text_alignment",
+      "label": "Text Alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Top Spacing",
+      "min": 0,
+      "max": 200,
+      "step": 10,
+      "default": 0,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Bottom Spacing",
+      "min": 0,
+      "max": 200,
+      "step": 10,
+      "default": 0,
+      "unit": "px"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Parallax"
+    }
+  ]
+}
+{% endschema %}
