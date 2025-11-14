@@ -657,6 +657,9 @@ p:empty {
   height: 100%;
 }
 
+.header-logo__image-container {
+  background-color: aqua;
+}
 .background-image-fit img,
 .background-image-fit svg {
   object-fit: contain;
