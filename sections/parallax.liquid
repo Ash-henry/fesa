@@ -37,18 +37,15 @@
         }
     }
 
+    {%- comment -%}Simplified overlay to use single color with opacity{%- endcomment -%}
     .parallax-overlay-{{ section.id }} {
         position: absolute;
         top: 0;
         left: 0;
         width: 100%;
         height: 100%;
-        background-color: rgba(
-      {{ section.settings.color_scheme.settings.background.red }},
-      {{ section.settings.color_scheme.settings.background.green }},
-      {{ section.settings.color_scheme.settings.background.blue }},
-      {{ section.settings.overlay_opacity | divided_by: 100.0 }}
-    );
+        background-color: rgb(var(--color-background));
+        opacity: {{ section.settings.overlay_opacity | divided_by: 100.0 }};
         z-index: 1;
     }
 
@@ -59,11 +56,7 @@
         margin: 0 auto;
         padding: 0 20px;
         text-align: {{ section.settings.text_alignment }};
-        color: rgb(
-      {{ section.settings.color_scheme.settings.text.red }},
-      {{ section.settings.color_scheme.settings.text.green }},
-      {{ section.settings.color_scheme.settings.text.blue }}
-    );
+        color: rgb(var(--color-foreground));
     }
 
     .parallax-heading-{{ section.id }} {
@@ -89,16 +82,8 @@
         text-decoration: none;
         border-radius: 8px;
         transition: all 0.3s ease;
-        background-color: rgb(
-      {{ section.settings.color_scheme.settings.button.red }},
-      {{ section.settings.color_scheme.settings.button.green }},
-      {{ section.settings.color_scheme.settings.button.blue }}
-    );
-        color: rgb(
-      {{ section.settings.color_scheme.settings.button_label.red }},
-      {{ section.settings.color_scheme.settings.button_label.green }},
-      {{ section.settings.color_scheme.settings.button_label.blue }}
-    );
+        background-color: rgb(var(--color-button));
+        color: rgb(var(--color-button-text));
     }
 
     .parallax-button-{{ section.id }}:hover {
@@ -121,7 +106,8 @@
     }
 </style>
 
-<section class="parallax-section-{{ section.id }}">
+{%- comment -%}Added color scheme class to section{%- endcomment -%}
+<section class="parallax-section-{{ section.id }} color-{{ section.settings.color_scheme }}">
     <div class="parallax-background-{{ section.id }}"></div>
     <div class="parallax-overlay-{{ section.id }}"></div>
 

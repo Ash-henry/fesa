@@ -1,0 +1,858 @@
+<div class="zoom-lookbook-{{ section.id }} color-{{ section.settings.color_scheme }}">
+    <style>
+        .zoom-lookbook-{{ section.id }} {
+            padding-top: {{ section.settings.padding_top }}px;
+            padding-bottom: {{ section.settings.padding_bottom }}px;
+        }
+
+        .zoom-lookbook-container-{{ section.id }} {
+            max-width: {{ section.settings.container_width }}px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .zoom-lookbook-header-{{ section.id }} {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .zoom-lookbook-title-{{ section.id }} {
+            font-size: {{ section.settings.heading_size }}px;
+            font-weight: 600;
+            margin: 0 0 16px 0;
+            line-height: 1.2;
+        }
+
+        .zoom-lookbook-description-{{ section.id }} {
+            font-size: {{ section.settings.text_size }}px;
+            opacity: 0.8;
+            margin: 0;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .zoom-lookbook-wrapper-{{ section.id }} {
+            position: relative;
+            width: 100%;
+            overflow: hidden;
+            border-radius: 12px;
+            background: rgba(var(--color-foreground), 0.05);
+            cursor: move;
+            cursor: grab;
+            user-select: none;
+        }
+
+        .zoom-lookbook-wrapper-{{ section.id }}:active {
+            cursor: grabbing;
+        }
+
+        .zoom-lookbook-image-container-{{ section.id }} {
+            position: relative;
+            width: 100%;
+            height: {{ section.settings.lookbook_height }}px;
+            overflow: hidden;
+        }
+
+        .zoom-lookbook-image-{{ section.id }} {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+            transform-origin: center center;
+        }
+
+        .zoom-lookbook-hotspot-{{ section.id }} {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            transform: translate(-50%, -50%);
+            cursor: pointer;
+            z-index: 10;
+            transition: all 0.3s ease;
+        }
+
+        .zoom-lookbook-hotspot-{{ section.id }}:hover {
+            transform: translate(-50%, -50%) scale(1.2);
+        }
+
+        .zoom-lookbook-hotspot-pulse-{{ section.id }} {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: {{ section.settings.hotspot_color }};
+            position: relative;
+            animation: pulse-{{ section.id }} 2s infinite;
+        }
+
+        .zoom-lookbook-hotspot-pulse-{{ section.id }}::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 12px;
+            height: 12px;
+            background: white;
+            border-radius: 50%;
+        }
+
+        .zoom-lookbook-hotspot-pulse-{{ section.id }}::after {
+            content: '+';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: {{ section.settings.hotspot_color }};
+            font-size: 14px;
+            font-weight: bold;
+            line-height: 1;
+        }
+
+        @keyframes pulse-{{ section.id }} {
+            0%, 100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.6;
+                transform: scale(1.1);
+            }
+        }
+
+        /* Added tooltip styles */
+        .zoom-lookbook-tooltip-{{ section.id }} {
+            position: absolute;
+            background: rgba(var(--color-foreground), 0.95);
+            color: rgb(var(--color-background));
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            white-space: nowrap;
+            pointer-events: none;
+            z-index: 50;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .zoom-lookbook-hotspot-{{ section.id }}:hover .zoom-lookbook-tooltip-{{ section.id }} {
+            opacity: 1;
+        }
+
+        /* Tooltip arrow */
+        .zoom-lookbook-tooltip-{{ section.id }}::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 0;
+            border: 6px solid transparent;
+        }
+
+        /* Tooltip positions */
+        .zoom-lookbook-tooltip-top-{{ section.id }} {
+            bottom: calc(100% + 10px);
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .zoom-lookbook-tooltip-top-{{ section.id }}::after {
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border-top-color: rgba(var(--color-foreground), 0.95);
+        }
+
+        .zoom-lookbook-tooltip-bottom-{{ section.id }} {
+            top: calc(100% + 10px);
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .zoom-lookbook-tooltip-bottom-{{ section.id }}::after {
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border-bottom-color: rgba(var(--color-foreground), 0.95);
+        }
+
+        .zoom-lookbook-tooltip-left-{{ section.id }} {
+            right: calc(100% + 10px);
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .zoom-lookbook-tooltip-left-{{ section.id }}::after {
+            left: 100%;
+            top: 50%;
+            transform: translateY(-50%);
+            border-left-color: rgba(var(--color-foreground), 0.95);
+        }
+
+        .zoom-lookbook-tooltip-right-{{ section.id }} {
+            left: calc(100% + 10px);
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .zoom-lookbook-tooltip-right-{{ section.id }}::after {
+            right: 100%;
+            top: 50%;
+            transform: translateY(-50%);
+            border-right-color: rgba(var(--color-foreground), 0.95);
+        }
+
+        .zoom-lookbook-popup-{{ section.id }} {
+            position: absolute;
+            background: rgb(var(--color-background));
+            border: 1px solid rgba(var(--color-foreground), 0.1);
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            padding: 0;
+            z-index: 100;
+            min-width: 280px;
+            max-width: 320px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            transform: translateY(10px);
+        }
+
+        .zoom-lookbook-popup-{{ section.id }}.active {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+
+        .zoom-lookbook-popup-image-{{ section.id }} {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 12px 12px 0 0;
+        }
+
+        .zoom-lookbook-popup-content-{{ section.id }} {
+            padding: 20px;
+        }
+
+        .zoom-lookbook-popup-title-{{ section.id }} {
+            font-size: 18px;
+            font-weight: 600;
+            margin: 0 0 8px 0;
+        }
+
+        .zoom-lookbook-popup-description-{{ section.id }} {
+            font-size: 14px;
+            opacity: 0.7;
+            margin: 0 0 12px 0;
+            line-height: 1.5;
+        }
+
+        .zoom-lookbook-popup-price-{{ section.id }} {
+            font-size: 20px;
+            font-weight: 700;
+            margin: 0 0 16px 0;
+        }
+
+        .zoom-lookbook-popup-button-{{ section.id }} {
+            display: inline-block;
+            padding: 12px 24px;
+            background: rgb(var(--color-button));
+            color: rgb(var(--color-button-text));
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            text-align: center;
+        }
+
+        .zoom-lookbook-popup-button-{{ section.id }}:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        .zoom-lookbook-popup-close-{{ section.id }} {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.5);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            line-height: 1;
+            transition: all 0.3s ease;
+            z-index: 1;
+        }
+
+        .zoom-lookbook-popup-close-{{ section.id }}:hover {
+            background: rgba(0, 0, 0, 0.7);
+            transform: rotate(90deg);
+        }
+
+        .zoom-lookbook-controls-{{ section.id }} {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .zoom-lookbook-control-button-{{ section.id }} {
+            padding: 12px 20px;
+            background: rgb(var(--color-button));
+            color: rgb(var(--color-button-text));
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .zoom-lookbook-control-button-{{ section.id }}:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .zoom-lookbook-image-container-{{ section.id }} {
+                height: 400px;
+            }
+
+            .zoom-lookbook-popup-{{ section.id }} {
+                max-width: 260px;
+                min-width: 260px;
+            }
+
+            .zoom-lookbook-title-{{ section.id }} {
+                font-size: calc({{ section.settings.heading_size }}px * 0.7);
+            }
+        }
+    </style>
+
+    <div class="zoom-lookbook-container-{{ section.id }}">
+        {% if section.settings.heading != blank or section.settings.description != blank %}
+            <div class="zoom-lookbook-header-{{ section.id }}">
+                {% if section.settings.heading != blank %}
+                    <h2 class="zoom-lookbook-title-{{ section.id }}">{{ section.settings.heading }}</h2>
+                {% endif %}
+                {% if section.settings.description != blank %}
+                    <p class="zoom-lookbook-description-{{ section.id }}">{{ section.settings.description }}</p>
+                {% endif %}
+            </div>
+        {% endif %}
+
+        <div class="zoom-lookbook-wrapper-{{ section.id }}" id="lookbook-wrapper-{{ section.id }}">
+            <div class="zoom-lookbook-image-container-{{ section.id }}">
+                {% if section.settings.lookbook_image %}
+                    <img
+                            src="{{ section.settings.lookbook_image | image_url: width: 2000 }}"
+                            alt="{{ section.settings.lookbook_image.alt | escape }}"
+                            class="zoom-lookbook-image-{{ section.id }}"
+                            id="lookbook-image-{{ section.id }}"
+                            loading="lazy"
+                    >
+                {% else %}
+                    <img
+                            src="https://via.placeholder.com/1600x900/cccccc/666666?text=Upload+Lookbook+Image"
+                            alt="Placeholder"
+                            class="zoom-lookbook-image-{{ section.id }}"
+                            id="lookbook-image-{{ section.id }}"
+                    >
+                {% endif %}
+
+                {% for block in section.blocks %}
+                    <div
+                            class="zoom-lookbook-hotspot-{{ section.id }}"
+                            style="left: {{ block.settings.position_x }}%; top: {{ block.settings.position_y }}%;"
+                            data-hotspot-id="{{ block.id }}"
+                    >
+                        <div class="zoom-lookbook-hotspot-pulse-{{ section.id }}"></div>
+
+                        {%- comment -%} Added tooltip support {%- endcomment -%}
+                        {% if block.settings.tooltip_text != blank %}
+                            <div class="zoom-lookbook-tooltip-{{ section.id }} zoom-lookbook-tooltip-{{ block.settings.tooltip_position }}-{{ section.id }}">
+                                {{ block.settings.tooltip_text }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div
+                            class="zoom-lookbook-popup-{{ section.id }}"
+                            id="popup-{{ block.id }}"
+                            style="display: none;"
+                    >
+                        <button class="zoom-lookbook-popup-close-{{ section.id }}" onclick="closePopup{{ section.id }}('{{ block.id }}')">×</button>
+
+                        {% if block.settings.product_image %}
+                            <img
+                                    src="{{ block.settings.product_image | image_url: width: 400 }}"
+                                    alt="{{ block.settings.product_title | escape }}"
+                                    class="zoom-lookbook-popup-image-{{ section.id }}"
+                            >
+                        {% endif %}
+
+                        <div class="zoom-lookbook-popup-content-{{ section.id }}">
+                            {% if block.settings.product_title != blank %}
+                                <h3 class="zoom-lookbook-popup-title-{{ section.id }}">{{ block.settings.product_title }}</h3>
+                            {% endif %}
+
+                            {% if block.settings.product_description != blank %}
+                                <p class="zoom-lookbook-popup-description-{{ section.id }}">{{ block.settings.product_description }}</p>
+                            {% endif %}
+
+                            {% if block.settings.product_price != blank %}
+                                <div class="zoom-lookbook-popup-price-{{ section.id }}">{{ block.settings.product_price }}</div>
+                            {% endif %}
+
+                            {% if block.settings.product_link != blank %}
+                                <a href="{{ block.settings.product_link }}" class="zoom-lookbook-popup-button-{{ section.id }}">
+                                    {{ block.settings.button_text | default: "View Product" }}
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        {% if section.settings.show_zoom_controls %}
+            <div class="zoom-lookbook-controls-{{ section.id }}">
+                <button class="zoom-lookbook-control-button-{{ section.id }}" onclick="zoomIn{{ section.id }}()">Zoom In</button>
+                <button class="zoom-lookbook-control-button-{{ section.id }}" onclick="zoomOut{{ section.id }}()">Zoom Out</button>
+                <button class="zoom-lookbook-control-button-{{ section.id }}" onclick="resetZoom{{ section.id }}()">Reset</button>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    (function() {
+        const wrapper = document.getElementById('lookbook-wrapper-{{ section.id }}');
+        const image = document.getElementById('lookbook-image-{{ section.id }}');
+        const hotspots = document.querySelectorAll('.zoom-lookbook-hotspot-{{ section.id }}');
+
+        let scale = 1;
+        let translateX = 0;
+        let translateY = 0;
+        let isDragging = false;
+        let startX = 0;
+        let startY = 0;
+        let currentX = 0;
+        let currentY = 0;
+        let activePopup = null;
+
+        function updateTransform() {
+            image.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+        }
+
+        // Zoom functions
+        window['zoomIn{{ section.id }}'] = function() {
+            scale = Math.min(scale + 0.2, {{ section.settings.max_zoom }});
+            updateTransform();
+        };
+
+        window['zoomOut{{ section.id }}'] = function() {
+            scale = Math.max(scale - 0.2, 1);
+            if (scale === 1) {
+                translateX = 0;
+                translateY = 0;
+            }
+            updateTransform();
+        };
+
+        window['resetZoom{{ section.id }}'] = function() {
+            scale = 1;
+            translateX = 0;
+            translateY = 0;
+            updateTransform();
+            closeAllPopups{{ section.id }}();
+        };
+
+        // Mouse wheel zoom
+        wrapper.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            const delta = e.deltaY > 0 ? -0.1 : 0.1;
+            scale = Math.max(1, Math.min({{ section.settings.max_zoom }}, scale + delta));
+            if (scale === 1) {
+                translateX = 0;
+                translateY = 0;
+            }
+            updateTransform();
+        });
+
+        // Pan functionality
+        wrapper.addEventListener('mousedown', (e) => {
+            if (e.target.closest('.zoom-lookbook-hotspot-{{ section.id }}')) return;
+            isDragging = true;
+            startX = e.clientX - currentX;
+            startY = e.clientY - currentY;
+        });
+
+        wrapper.addEventListener('mousemove', (e) => {
+            if (!isDragging || scale === 1) return;
+
+            currentX = e.clientX - startX;
+            currentY = e.clientY - startY;
+
+            const maxX = (image.offsetWidth * (scale - 1)) / 2;
+            const maxY = (image.offsetHeight * (scale - 1)) / 2;
+
+            translateX = Math.max(-maxX, Math.min(maxX, currentX));
+            translateY = Math.max(-maxY, Math.min(maxY, currentY));
+
+            updateTransform();
+        });
+
+        wrapper.addEventListener('mouseup', () => {
+            isDragging = false;
+        });
+
+        wrapper.addEventListener('mouseleave', () => {
+            isDragging = false;
+        });
+
+        // Touch support for mobile
+        let touchStartX = 0;
+        let touchStartY = 0;
+
+        wrapper.addEventListener('touchstart', (e) => {
+            if (e.target.closest('.zoom-lookbook-hotspot-{{ section.id }}')) return;
+            touchStartX = e.touches[0].clientX - currentX;
+            touchStartY = e.touches[0].clientY - currentY;
+        });
+
+        wrapper.addEventListener('touchmove', (e) => {
+            if (scale === 1) return;
+            e.preventDefault();
+
+            currentX = e.touches[0].clientX - touchStartX;
+            currentY = e.touches[0].clientY - touchStartY;
+
+            const maxX = (image.offsetWidth * (scale - 1)) / 2;
+            const maxY = (image.offsetHeight * (scale - 1)) / 2;
+
+            translateX = Math.max(-maxX, Math.min(maxX, currentX));
+            translateY = Math.max(-maxY, Math.min(maxY, currentY));
+
+            updateTransform();
+        });
+
+        // Hotspot functionality
+        hotspots.forEach(hotspot => {
+            hotspot.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const hotspotId = hotspot.getAttribute('data-hotspot-id');
+                togglePopup{{ section.id }}(hotspotId, hotspot);
+            });
+        });
+
+        function closeAllPopups{{ section.id }}() {
+            document.querySelectorAll('.zoom-lookbook-popup-{{ section.id }}').forEach(popup => {
+                popup.classList.remove('active');
+                popup.style.display = 'none';
+            });
+            activePopup = null;
+        }
+
+        window['closePopup{{ section.id }}'] = function(blockId) {
+            const popup = document.getElementById('popup-' + blockId);
+            if (popup) {
+                popup.classList.remove('active');
+                setTimeout(() => {
+                    popup.style.display = 'none';
+                }, 300);
+            }
+            activePopup = null;
+        };
+
+        function togglePopup{{ section.id }}(blockId, hotspot) {
+            const popup = document.getElementById('popup-' + blockId);
+
+            if (activePopup === blockId) {
+                closePopup{{ section.id }}(blockId);
+                return;
+            }
+
+            closeAllPopups{{ section.id }}();
+
+            if (popup) {
+                popup.style.display = 'block';
+
+                const hotspotRect = hotspot.getBoundingClientRect();
+                const wrapperRect = wrapper.getBoundingClientRect();
+                const popupWidth = 320;
+                const popupHeight = popup.offsetHeight;
+
+                let left = hotspotRect.left - wrapperRect.left + hotspot.offsetWidth / 2;
+                let top = hotspotRect.top - wrapperRect.top + hotspot.offsetHeight + 10;
+
+                if (left + popupWidth > wrapperRect.width) {
+                    left = wrapperRect.width - popupWidth - 20;
+                }
+
+                if (left < 20) {
+                    left = 20;
+                }
+
+                if (top + popupHeight > wrapperRect.height) {
+                    top = hotspotRect.top - wrapperRect.top - popupHeight - 10;
+                }
+
+                popup.style.left = left + 'px';
+                popup.style.top = top + 'px';
+
+                setTimeout(() => {
+                    popup.classList.add('active');
+                }, 10);
+
+                activePopup = blockId;
+            }
+        }
+
+        // Close popup when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.zoom-lookbook-popup-{{ section.id }}') &&
+                !e.target.closest('.zoom-lookbook-hotspot-{{ section.id }}')) {
+                closeAllPopups{{ section.id }}();
+            }
+        });
+    })();
+</script>
+
+{% schema %}
+{
+  "name": "Zoom Lookbook",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Shop The Look"
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Description",
+      "default": "Click on the hotspots to discover products"
+    },
+    {
+      "type": "range",
+      "id": "heading_size",
+      "min": 24,
+      "max": 72,
+      "step": 2,
+      "unit": "px",
+      "label": "Heading size",
+      "default": 48
+    },
+    {
+      "type": "range",
+      "id": "text_size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Text size",
+      "default": 16
+    },
+    {
+      "type": "image_picker",
+      "id": "lookbook_image",
+      "label": "Lookbook image"
+    },
+    {
+      "type": "range",
+      "id": "lookbook_height",
+      "min": 400,
+      "max": 1000,
+      "step": 50,
+      "unit": "px",
+      "label": "Lookbook height",
+      "default": 600
+    },
+    {
+      "type": "color",
+      "id": "hotspot_color",
+      "label": "Hotspot color",
+      "default": "#000000"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_zoom_controls",
+      "label": "Show zoom controls",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "max_zoom",
+      "min": 1.5,
+      "max": 4,
+      "step": 0.5,
+      "label": "Maximum zoom level",
+      "default": 3
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme"
+    },
+    {
+      "type": "range",
+      "id": "container_width",
+      "min": 800,
+      "max": 1600,
+      "step": 50,
+      "unit": "px",
+      "label": "Container width",
+      "default": 1200
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 200,
+      "step": 10,
+      "unit": "px",
+      "label": "Top spacing",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 200,
+      "step": 10,
+      "unit": "px",
+      "label": "Bottom spacing",
+      "default": 60
+    }
+  ],
+  "blocks": [
+    {
+      "type": "hotspot",
+      "name": "Hotspot",
+      "settings": [
+        {
+          "type": "range",
+          "id": "position_x",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "unit": "%",
+          "label": "Horizontal position",
+          "default": 50
+        },
+        {
+          "type": "range",
+          "id": "position_y",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "unit": "%",
+          "label": "Vertical position",
+          "default": 50
+        },
+        {
+          "type": "text",
+          "id": "tooltip_text",
+          "label": "Tooltip text",
+          "info": "Short text shown on hover"
+        },
+        {
+          "type": "select",
+          "id": "tooltip_position",
+          "label": "Tooltip position",
+          "options": [
+            {
+              "value": "top",
+              "label": "Top"
+            },
+            {
+              "value": "bottom",
+              "label": "Bottom"
+            },
+            {
+              "value": "left",
+              "label": "Left"
+            },
+            {
+              "value": "right",
+              "label": "Right"
+            }
+          ],
+          "default": "top"
+        },
+        {
+          "type": "image_picker",
+          "id": "product_image",
+          "label": "Product image"
+        },
+        {
+          "type": "text",
+          "id": "product_title",
+          "label": "Product title",
+          "default": "Product Name"
+        },
+        {
+          "type": "textarea",
+          "id": "product_description",
+          "label": "Product description",
+          "default": "Brief product description"
+        },
+        {
+          "type": "text",
+          "id": "product_price",
+          "label": "Product price",
+          "default": "$99.00"
+        },
+        {
+          "type": "url",
+          "id": "product_link",
+          "label": "Product link"
+        },
+        {
+          "type": "text",
+          "id": "button_text",
+          "label": "Button text",
+          "default": "View Product"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Zoom Lookbook",
+      "blocks": [
+        {
+          "type": "hotspot",
+          "settings": {
+            "position_x": 30,
+            "position_y": 40
+          }
+        },
+        {
+          "type": "hotspot",
+          "settings": {
+            "position_x": 65,
+            "position_y": 35
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

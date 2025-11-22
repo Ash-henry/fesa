@@ -657,10 +657,7 @@ p:empty {
   height: 100%;
 }
 
-.product-media-container {
-  background-color: red !important;
-  border:10px solid blue;
-}
+
 .background-image-fit img,
 .background-image-fit svg {
   object-fit: contain;

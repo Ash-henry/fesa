@@ -66,7 +66,7 @@
         width: 48px;
         height: 48px;
         background: {{ section.settings.handle_color }};
-        border: 3px solid rgb(var(--color-scheme-text));
+        border: 3px solid white;
         border-radius: 50%;
         display: flex;
         align-items: center;
@@ -77,15 +77,15 @@
     .before-after-slider__handle svg {
         width: 24px;
         height: 24px;
-        fill: rgb(var(--color-scheme-text));
+        fill: white;
     }
 
     .before-after-slider__label {
         position: absolute;
         top: 20px;
         padding: 8px 16px;
-        background: rgba(var(--color-scheme-text), 0.8);
-        color: rgb(var(--color-scheme-background));
+        background: rgba(0, 0, 0, 0.7);
+        color: white;
         font-size: 14px;
         font-weight: 600;
         text-transform: uppercase;
@@ -129,9 +129,8 @@
     }
 </style>
 
-<div class="before-after-slider__container">
-    <div class="before-after-slider"
-         style="background-color: rgb(var(--color-scheme-background)); color: rgb(var(--color-scheme-text));">
+<div class="before-after-slider__container color-{{ section.settings.color_scheme }}">
+    <div class="before-after-slider">
 
         {% if section.settings.section_title != blank %}
             <h2 style="text-align: center; margin-bottom: 32px; font-size: 32px; font-weight: 700; color: rgb(var(--color-scheme-text));">
